@@ -9,7 +9,7 @@ function App() {
 	}, []);
 
 	return (
-		<div className="font-mono container mx-auto h-screen text-center py-10 flex flex-col items-center">
+		<div className="font-sans container mx-auto h-screen text-center py-10 flex flex-col items-center">
 			<header className='text-2xl mb-5'>
 				Image Resizer
 			</header>

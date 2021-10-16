@@ -1,5 +1,6 @@
 
 import { useState, useRef } from "react";
+import ImageResizer from "./ImageResizer";
 import styles from '../styles/upload.module.scss';
 
 const ImageUploader = (onFileChange) => {
@@ -18,8 +19,8 @@ const ImageUploader = (onFileChange) => {
 
     return (
         <div className="border-solid rounded border-2 py-5 px-10 border-black">
-            <label htmlFor="file-upload" className={`${styles.upload_label} ${uploadDisabled ? styles.disabled : ''}`}>
-                📤 Upload Files
+            <label htmlFor="file-upload" className={`${styles.upload_label} ${uploadDisabled ? styles.disabled : ''} mb-3`}>
+                Browse Files
             </label>
             <input
                 id="file-upload"
@@ -30,6 +31,7 @@ const ImageUploader = (onFileChange) => {
                 multiple
                 disabled={uploadDisabled}
             />
+            <ImageResizer />
         </div>
     )
 }
