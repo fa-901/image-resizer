@@ -1,7 +1,8 @@
-import React from 'react';
+import { useEffect } from 'react';
+import ImageUploader from './components/ImageUploader';
 
 function App() {
-	React.useEffect(() => {
+	useEffect(() => {
 		fetch("/api")
 			.then((res) => { return res.json() })
 			.then((data) => console.log(data.message));
@@ -13,7 +14,7 @@ function App() {
 				Image Resizer
 			</header>
 			<main>
-
+				<ImageUploader />
 			</main>
 		</div>
 	);

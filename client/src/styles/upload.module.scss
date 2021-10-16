@@ -1,0 +1,15 @@
+input[type="file"] {
+    display: none;
+}
+.upload_label {
+    border: 1px solid black;
+    display: inline-block;
+    padding: 0.2rem 0.8rem;
+    cursor: pointer;
+
+    &.disabled {
+        color: #ccc;
+        border-color: #ccc;
+        cursor: not-allowed;
+    }
+}
