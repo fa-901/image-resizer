@@ -1,14 +1,15 @@
 
 import { useState, useRef } from "react";
 import ImageResizer from "./ImageResizer";
+import Previewer from "./Previewer";
 import styles from '../styles/upload.module.scss';
 
-const ImageUploader = (onFileChange) => {
+const ImageUploader = ({ onFileChange }) => {
     const [files, setFile] = useState([]);
     const fileInput = useRef(null);
 
     const handleFile = (e) => {
-        if (e.target.files.lenth < 5) {
+        if (e.target.files.length < 5) {
             e.preventDefault();
             return;
         }
@@ -31,6 +32,7 @@ const ImageUploader = (onFileChange) => {
                 multiple
                 disabled={uploadDisabled}
             />
+            <Previewer list={files} />
             <ImageResizer />
         </div>
     )

@@ -36,7 +36,7 @@ const ImageResizer = () => {
     });
     return (
         <>
-            <div className='flex mb-3'>
+            <div className='flex justify-center mb-3'>
                 <label className='mr-5'>Select Resolution:</label>
                 <div className={styles.res_radio}>
                     {radioList}
