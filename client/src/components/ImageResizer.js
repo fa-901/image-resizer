@@ -16,9 +16,7 @@ const resList = [
     }
 ]
 
-const ImageResizer = () => {
-    const [selectedRes, setRes] = useState('');
-
+const ImageResizer = ({ resVal, resUpdate }) => {
 
     const radioList = resList.map((item) => {
         const key = `${item.height} x ${item.width}`;
@@ -27,8 +25,8 @@ const ImageResizer = () => {
                 <input
                     type="radio"
                     value={key}
-                    checked={selectedRes === key}
-                    onChange={() => { setRes(key) }}
+                    checked={resVal === key}
+                    onChange={() => { resUpdate(key); }}
                 />
                 {key}
             </label>
@@ -42,9 +40,6 @@ const ImageResizer = () => {
                     {radioList}
                 </div>
             </div>
-            <button className={`${selectedRes ? '' : 'hidden'} btn`}>
-                Upload Files
-            </button>
         </>
     )
 }

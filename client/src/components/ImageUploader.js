@@ -6,6 +6,7 @@ import styles from '../styles/upload.module.scss';
 
 const ImageUploader = ({ onFileChange }) => {
     const [files, setFile] = useState([]);
+    const [selectedRes, setRes] = useState('');
     const fileInput = useRef(null);
 
     const handleFile = (e) => {
@@ -14,6 +15,26 @@ const ImageUploader = ({ onFileChange }) => {
             return;
         }
         setFile(e.target.files);
+    }
+
+    const uploadToBucket = () => {
+        const data = new FormData();
+        for (const file of files) {
+            data.append('input_files', file, file.name);
+        }
+
+        fetch("/api/upload", {
+            method: 'POST',
+            body: data,
+        })
+            .then((res) => {
+                if (res.ok) {
+                    alert('Files uploaded to server');
+                }
+                else {
+                    alert('Files could not be uploaded');
+                }
+            });
     }
 
     const uploadDisabled = false;
@@ -33,7 +54,10 @@ const ImageUploader = ({ onFileChange }) => {
                 disabled={uploadDisabled}
             />
             <Previewer list={files} />
-            <ImageResizer />
+            <ImageResizer resVal={selectedRes} resUpdate={(e) => { setRes(e) }} />
+            <button className={`${selectedRes ? '' : 'hidden'} btn`} onClick={uploadToBucket} >
+                Upload Files
+            </button>
         </div>
     )
 }

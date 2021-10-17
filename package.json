@@ -20,8 +20,14 @@
   },
   "homepage": "https://github.com/fa-901/insidemaps-takehome#readme",
   "dependencies": {
+    "aws-sdk": "^2.1009.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
-    "nodemon": "^2.0.13"
+    "multer": "^1.4.3",
+    "multer-s3": "^2.9.1",
+    "nodemon": "^2.0.13",
+    "uuid": "^8.3.2"
   },
   "engines": {
     "node": "14.18.1"
