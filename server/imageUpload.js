@@ -12,6 +12,36 @@ aws.config.update({
 });
 
 const s3 = new aws.S3();
+var sqs = new aws.SQS({ apiVersion: '2012-11-05' });
+
+const sendSQS = (list, resizeBy) => {
+    list
+        .filter((item) => item.status === 'success')
+        .map((item) => {
+            var params = {
+                DelaySeconds: 10,
+                MessageAttributes: {
+                    "FileURL": {
+                        DataType: "String",
+                        StringValue: item.url
+                    },
+                    "ResizeBy": {
+                        DataType: "Number",
+                        StringValue: resizeBy
+                    },
+                },
+                MessageBody: JSON.stringify(item),
+                QueueUrl: process.env.SQS_SUCCESS_URL
+            };
+            sqs.sendMessage(params, function (err, data) {
+                if (err) {
+                    console.log("Error", err);
+                } else {
+                    console.log("Success", data.MessageId);
+                }
+            });
+        })
+}
 
 const isAllowedMimetype = (mime) => ['image/png', 'image/jpg', 'image/jpeg', 'image/gif', 'image/x-ms-bmp', 'image/webp'].includes(mime.toString());
 const fileFilter = (req, file, callback) => {
@@ -74,6 +104,7 @@ const s3upload = (req, res) => {
             })
         }
         if (count === (file.length)) {
+            sendSQS(returnData, req.body.resizeBy);
             return res.json({
                 msg: "Uploaded!",
                 fileStatus: returnData,
