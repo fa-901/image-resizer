@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server/index.js",
+    "worker": "nodemon worker/index.js",
     "server": "nodemon server/index.js",
     "client": "cd client && npm run start",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -27,6 +28,8 @@
     "multer": "^1.4.3",
     "multer-s3": "^2.9.1",
     "nodemon": "^2.0.13",
+    "request": "^2.88.2",
+    "sharp": "^0.29.1",
     "uuid": "^8.3.2"
   },
   "engines": {
