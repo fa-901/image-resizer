@@ -37,10 +37,10 @@ const deleteMessage = (deleteParams) => {
     });
 }
 
-const uploadToS3 = (fileBuffer) => {
+const uploadToS3 = (fileName, fileBuffer) => {
     var params = {
         Bucket: process.env.BUCKET,
-        Key: 'resized.png',
+        Key: `resized-${fileName}`,
         Body: fileBuffer,
         acl: 'public-read',
         Tagging: 'public=yes',
@@ -50,7 +50,7 @@ const uploadToS3 = (fileBuffer) => {
     });
 }
 
-const resizeFn = (imageURL, resizeBy) => {
+const resizeFn = (fileName, imageURL, resizeBy) => {
     var request = require('request').defaults({ encoding: null });
     request.get(imageURL, function (err, res, body) {
         const input = new Buffer(body, 'binary');
@@ -58,8 +58,8 @@ const resizeFn = (imageURL, resizeBy) => {
         sharp(input)
             .resize(len, len)
             .toBuffer((sharpError, fileBuffer) => {
-                if(!sharpError){
-                    uploadToS3(fileBuffer);
+                if (!sharpError) {
+                    uploadToS3(fileName, fileBuffer);
                 }
             })
     });
@@ -74,9 +74,9 @@ const receiveMessage = () => sqs.receiveMessage(params, function (err, data) {
                 QueueUrl: queueURL,
                 ReceiptHandle: item.ReceiptHandle
             };
-            const { ResizeBy, FileURL } = item.MessageAttributes
+            const { ResizeBy, FileURL, FileName } = item.MessageAttributes
 
-            resizeFn(FileURL.StringValue, ResizeBy.StringValue)
+            resizeFn(FileName.StringValue, FileURL.StringValue, ResizeBy.StringValue)
             deleteMessage(deleteParams);
         })
     }

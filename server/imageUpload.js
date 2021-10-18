@@ -21,6 +21,10 @@ const sendSQS = (list, resizeBy) => {
             var params = {
                 DelaySeconds: 10,
                 MessageAttributes: {
+                    "FileName": {
+                        DataType: "String",
+                        StringValue: item.file
+                    },
                     "FileURL": {
                         DataType: "String",
                         StringValue: item.url
@@ -43,37 +47,11 @@ const sendSQS = (list, resizeBy) => {
         })
 }
 
-const isAllowedMimetype = (mime) => ['image/png', 'image/jpg', 'image/jpeg', 'image/gif', 'image/x-ms-bmp', 'image/webp'].includes(mime.toString());
-const fileFilter = (req, file, callback) => {
-    const fileMime = file.mimetype;
-    if (isAllowedMimetype(fileMime)) {
-        callback(null, true)
-    } else {
-        callback(null, false)
-    }
-}
-
 const getUniqFileName = (originalname) => {
     const name = uuidv4();
     const ext = originalname.split('.').pop();
     return `${name}.${ext}`;
 }
-
-const handleUploadMiddleware = multer({ /** old function, ignore this. doesnt support object tagging */
-    fileFilter,
-    storage: multerS3({
-        s3: s3,
-        bucket: process.env.BUCKET,
-        ACL: 'public-read',
-        contentType: multerS3.AUTO_CONTENT_TYPE,
-        key: function (req, file, cb) {
-            const fileName = getUniqFileName(file.originalname);
-            const finalPath = `${fileName}`;
-            file.newName = fileName;
-            cb(null, finalPath);
-        }
-    })
-});
 
 var storage = multer.memoryStorage({
     destination: function (req, file, callback) {
@@ -87,18 +65,18 @@ var multipleUpload = multer({ storage: storage }).array('file');
 const s3upload = (req, res) => {
     let returnData = [];
     const file = req.files;
-    let count = 0;
-    let afterAllUpload = (err, data, item) => {
+    let count = 0; /** counts all files that are uploaded */
+    let afterAllUpload = (err, data, item, fileName) => {
         count++;
         if (err) {
             returnData.push({
-                'file': item.originalname,
+                'file': fileName,
                 'status': 'failed',
             })
         }
         else {
             returnData.push({
-                'file': item.originalname,
+                'file': fileName,
                 'status': 'success',
                 'url': data.Location,
             })
@@ -113,15 +91,16 @@ const s3upload = (req, res) => {
     }
 
     file.map((item) => {
+        const newName = getUniqFileName(item.originalname);
         var params = {
             Bucket: process.env.BUCKET,
-            Key: (item.originalname),
+            Key: newName,
             Body: item.buffer,
             acl: 'public-read',
             Tagging: 'public=yes',
         };
         s3.upload(params, function (err, data) {
-            afterAllUpload(err, data, item);
+            afterAllUpload(err, data, item, newName);
         });
     });
 }
@@ -129,5 +108,4 @@ const s3upload = (req, res) => {
 module.exports = {
     multipleUpload,
     s3upload,
-    handleUploadMiddleware
 };
