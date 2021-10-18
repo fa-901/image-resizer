@@ -1,7 +1,9 @@
 const path = require('path');
+const multer = require("multer");
 const express = require("express");
 const cors = require("cors");
-const handleUploadMiddleware = require("./imageUpload");
+// const handleUploadMiddleware = require("./imageUpload");
+const uploadController = require('./imageUpload');
 
 const PORT = process.env.PORT || 9000;
 
@@ -23,14 +25,4 @@ app.get('*', (req, res) => {
 	res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
 });
 
-const api_uploadFiles = (req, res) => {
-	res.status(200);
-	return res.json({
-		msg: "Uploaded!",
-		files: req.input_files
-	});
-}
-app.post('/api/upload',
-	handleUploadMiddleware.array('input_files', 6),
-	api_uploadFiles
-);
+app.post('/api/upload', uploadController.multipleUpload, uploadController.s3upload);

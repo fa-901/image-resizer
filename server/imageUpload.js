@@ -29,7 +29,7 @@ const getUniqFileName = (originalname) => {
     return `${name}.${ext}`;
 }
 
-const handleUploadMiddleware = multer({
+const handleUploadMiddleware = multer({ /** old function, ignore this. doesnt support object tagging */
     fileFilter,
     storage: multerS3({
         s3: s3,
@@ -37,7 +37,6 @@ const handleUploadMiddleware = multer({
         ACL: 'public-read',
         contentType: multerS3.AUTO_CONTENT_TYPE,
         key: function (req, file, cb) {
-            console.log(file)
             const fileName = getUniqFileName(file.originalname);
             const finalPath = `${fileName}`;
             file.newName = fileName;
@@ -46,4 +45,58 @@ const handleUploadMiddleware = multer({
     })
 });
 
-module.exports = handleUploadMiddleware;
+var storage = multer.memoryStorage({
+    destination: function (req, file, callback) {
+        callback(null, '');
+    }
+});
+
+var multipleUpload = multer({ storage: storage }).array('file');
+
+
+const s3upload = (req, res) => {
+    let returnData = [];
+    const file = req.files;
+    let count = 0;
+    let afterAllUpload = (err, data, item) => {
+        count++;
+        if (err) {
+            returnData.push({
+                'file': item.originalname,
+                'status': 'failed',
+            })
+        }
+        else {
+            returnData.push({
+                'file': item.originalname,
+                'status': 'success',
+                'url': data.Location,
+            })
+        }
+        if (count === (file.length)) {
+            return res.json({
+                msg: "Uploaded!",
+                fileStatus: returnData,
+            });
+        }
+    }
+
+    file.map((item) => {
+        var params = {
+            Bucket: process.env.BUCKET,
+            Key: (item.originalname),
+            Body: item.buffer,
+            acl: 'public-read',
+            Tagging: 'public=yes',
+        };
+        s3.upload(params, function (err, data) {
+            afterAllUpload(err, data, item);
+        });
+    });
+}
+
+module.exports = {
+    multipleUpload,
+    s3upload,
+    handleUploadMiddleware
+};
