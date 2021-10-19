@@ -16,6 +16,7 @@ const ImageUploader = ({ onUpload }) => {
             e.preventDefault();
             return;
         }
+        onUpload([]);
         setFile(e.target.files);
     }
 
