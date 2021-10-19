@@ -77,6 +77,7 @@ const s3upload = (req, res) => {
         else {
             returnData.push({
                 'file': fileName,
+                'original': item.originalname,
                 'status': 'success',
                 'url': data.Location,
             })

@@ -38,9 +38,9 @@ const ImageDownloader = ({ urlData }) => {
 
     let downloadList = imgURL.map((img) => {
         return (
-            <div key={img.file} className={`border p-2 rounded`} >
-                <label className='mr-3'>
-                    {img.file}
+            <div key={img.url} className={`flex items-center border p-3 rounded`} >
+                <label className='mr-auto'>
+                    {img.originalName}
                 </label>
                 <a className="btn" href={img.url} download>
                     Download
@@ -52,7 +52,7 @@ const ImageDownloader = ({ urlData }) => {
 
     return (
         <div className="border-solid rounded border-2 mt-5 py-5 px-10 border-black">
-            <h1 className="text-l">Resized Images</h1>
+            <h1 className="text-xl mb-3">Resized Images</h1>
             <div className='grid grid-cols-1 gap-4'>
                 {downloadList}
             </div>

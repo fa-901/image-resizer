@@ -46,14 +46,16 @@ const uploadToS3 = (fileName, fileBuffer) => {
         Tagging: 'public=yes',
     };
     s3.upload(params, function (err, data) {
-        console.log(err, data);
+        if (!err) {
+            console.log(data.key);
+        }
     });
 }
 
 const resizeFn = (fileName, imageURL, resizeBy) => {
     var request = require('request').defaults({ encoding: null });
     request.get(imageURL, function (err, res, body) {
-        const input = new Buffer(body, 'binary');
+        const input = Buffer.from(body, 'binary');
         let len = parseInt(resizeBy, 10);
         sharp(input)
             .resize(len, len)

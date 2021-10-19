@@ -39,7 +39,7 @@ const ImageUploader = ({ onUpload }) => {
                     let resizedUrl = `https://${host}/resized-${item.file}`;
                     return {
                         url: resizedUrl,
-                        uploaded: false,
+                        originalName: item.original,
                     }
                 })
                 onUpload(list);
