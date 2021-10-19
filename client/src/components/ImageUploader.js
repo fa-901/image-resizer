@@ -18,10 +18,12 @@ const ImageUploader = ({ onUpload }) => {
         }
         onUpload([]);
         setFile(e.target.files);
+        setRes('');
     }
 
     const uploadToBucket = () => {
         toggleUpload(true);
+        onUpload([]);
         const data = new FormData();
         data.append('resizeBy', selectedRes.split(' x ')[0]);
         for (const file of files) {
@@ -44,6 +46,7 @@ const ImageUploader = ({ onUpload }) => {
                     }
                 })
                 onUpload(list);
+                setRes('');
             })
     }
 
@@ -65,7 +68,7 @@ const ImageUploader = ({ onUpload }) => {
             />
             <Previewer list={files} />
             <ImageResizer resVal={selectedRes} resUpdate={(e) => { setRes(e) }} />
-            <button className={`${selectedRes ? '' : 'hidden'} btn`} onClick={uploadToBucket} >
+            <button className={`${selectedRes ? '' : 'hidden'} btn`} onClick={uploadToBucket} disabled={uploading} >
                 Upload Files
                 {uploading && <img src={spinner} className='spinner' />}
             </button>

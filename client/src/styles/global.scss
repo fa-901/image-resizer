@@ -11,6 +11,11 @@
     &:active {
         background-color: #f2f2f2;
     }
+    &:disabled {
+        border-color: #ccc;
+        color: #ccc;
+        cursor: not-allowed;
+    }
 }
 
 .spinner {
