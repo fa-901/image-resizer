@@ -3,9 +3,11 @@ import { useState, useRef } from "react";
 import ImageResizer from "./ImageResizer";
 import Previewer from "./Previewer";
 import styles from '../styles/upload.module.scss';
+import spinner from '../images/spinner.gif';
 
-const ImageUploader = ({ onFileChange }) => {
+const ImageUploader = ({ onUpload }) => {
     const [files, setFile] = useState([]);
+    const [uploading, toggleUpload] = useState(false);
     const [selectedRes, setRes] = useState('');
     const fileInput = useRef(null);
 
@@ -18,23 +20,30 @@ const ImageUploader = ({ onFileChange }) => {
     }
 
     const uploadToBucket = () => {
+        toggleUpload(true);
         const data = new FormData();
+        data.append('resizeBy', selectedRes.split(' x ')[0]);
         for (const file of files) {
-            data.append('input_files', file, file.name);
+            data.append('file', file, file.name);
         }
 
         fetch("/api/upload", {
             method: 'POST',
             body: data,
         })
-            .then((res) => {
-                if (res.ok) {
-                    alert('Files uploaded to server');
-                }
-                else {
-                    alert('Files could not be uploaded');
-                }
-            });
+            .then((res) => res.json())
+            .then((data) => {
+                toggleUpload(false);
+                let list = data.fileStatus.map((item) => {
+                    let host = new URL(item.url).hostname;
+                    let resizedUrl = `https://${host}/resized-${item.file}`;
+                    return {
+                        url: resizedUrl,
+                        uploaded: false,
+                    }
+                })
+                onUpload(list);
+            })
     }
 
     const uploadDisabled = false;
@@ -57,6 +66,7 @@ const ImageUploader = ({ onFileChange }) => {
             <ImageResizer resVal={selectedRes} resUpdate={(e) => { setRes(e) }} />
             <button className={`${selectedRes ? '' : 'hidden'} btn`} onClick={uploadToBucket} >
                 Upload Files
+                {uploading && <img src={spinner} className='spinner' />}
             </button>
         </div>
     )

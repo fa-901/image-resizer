@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ImageUploader from './components/ImageUploader';
+import ImageDownloader from './components/ImageDownloader';
 
 function App() {
+	const [urlData, setURLData] = useState([]);
 	useEffect(() => {
 		fetch("/api")
 			.then((res) => { return res.json() })
@@ -14,7 +16,8 @@ function App() {
 				Image Resizer
 			</header>
 			<main>
-				<ImageUploader />
+				<ImageUploader onUpload={(data) => { setURLData(data) }} />
+				{urlData.length > 1 && <ImageDownloader urlData={urlData} />}
 			</main>
 		</div>
 	);
