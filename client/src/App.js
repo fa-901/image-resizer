@@ -1,29 +1,24 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from 'react';
+import ImageUploader from './components/ImageUploader';
+import ImageDownloader from './components/ImageDownloader';
 
 function App() {
-	React.useEffect(() => {
+	const [urlData, setURLData] = useState([]);
+	useEffect(() => {
 		fetch("/api")
 			.then((res) => { return res.json() })
 			.then((data) => console.log(data.message));
 	}, []);
+
 	return (
-		<div className="App">
-			<header className="App-header">
-				<img src={logo} className="App-logo" alt="logo" />
-				<p>
-					Edit <code>src/App.js</code> and save to reload.
-				</p>
-				<a
-					className="App-link"
-					href="https://reactjs.org"
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					Learn React
-				</a>
+		<div className="font-sans container mx-auto h-screen text-center py-10 flex flex-col items-center">
+			<header className='text-2xl mb-5'>
+				Image Resizer
 			</header>
+			<main>
+				<ImageUploader onUpload={(data) => { setURLData(data) }} />
+				{urlData.length > 1 && <ImageDownloader urlData={urlData} />}
+			</main>
 		</div>
 	);
 }

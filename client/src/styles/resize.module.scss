@@ -1,0 +1,23 @@
+.res_radio {
+    label {
+        display: block;
+        cursor: pointer;
+        input {
+            margin-right: 0.5rem;
+        }
+    }
+}
+
+.display {
+    max-width: 150px;
+    .img {
+        height: 70px;
+        object-fit: cover;
+    }
+    
+    .label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

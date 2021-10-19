@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.btn {
+    font-weight: 600;
+    border: 2px solid black;
+    padding: 0.2rem 0.8rem;
+    box-shadow: 0.2rem 0.2rem #663399;
+
+    &:active {
+        background-color: #f2f2f2;
+    }
+}
+
+.spinner {
+    width: 1rem;
+    display: inline;
+    margin-left: 0.3rem;
+    margin-bottom: 0.3rem;
+}
