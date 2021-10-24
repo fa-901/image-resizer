@@ -17,7 +17,7 @@ function App() {
 			</header>
 			<main>
 				<ImageUploader onUpload={(data) => { setURLData(data) }} />
-				{urlData.length > 1 && <ImageDownloader urlData={urlData} />}
+				{urlData.length > 1 && <ImageDownloader urlData={urlData} onClearData={setURLData} />}
 			</main>
 		</div>
 	);

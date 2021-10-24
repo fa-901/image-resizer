@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import spinner from '../images/spinner.gif';
 
-const ImageDownloader = ({ urlData }) => {
+const ImageDownloader = ({ urlData, onClearData }) => {
+    const [allLoaded, setLoaded] = useState(false);
     const [imgURL, setImg] = useState(urlData);
 
     useEffect(() => {
@@ -13,6 +14,8 @@ const ImageDownloader = ({ urlData }) => {
         }
         else {
             clearInterval(checkProgress);
+            setLoaded(true);
+            setTimeout(() => { onClearData([]) }, 300000);
         }
     }, [imgURL]);
 
@@ -71,6 +74,9 @@ const ImageDownloader = ({ urlData }) => {
             <div className='mb-3'>
                 <h1 className="text-xl">Resized Images {!isReady && <img src={spinner} className='spinner' />}</h1>
                 <h2>{readyCount}/{imgURL.length} Files Ready</h2>
+                {allLoaded && <h3 className="text-red-500">
+                    Your images are ready. You have 5 minutes to download.
+                </h3>}
             </div>
             <div className='grid grid-cols-1 gap-4'>
                 {downloadList}
