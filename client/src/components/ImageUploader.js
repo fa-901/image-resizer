@@ -24,7 +24,6 @@ const ImageUploader = ({ onUpload }) => {
     const openUploadSocket = () => {
         var socket = io.connect('http://localhost:9001');
         socket.on('upload progress', (data) => {
-            console.log(data);
             setSock(data);
         })
     }
