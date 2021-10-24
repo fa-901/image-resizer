@@ -61,7 +61,7 @@ var storage = multer.memoryStorage({
 var multipleUpload = multer({ storage: storage }).array('file');
 
 
-const s3upload = (req, res) => {
+const s3upload = (req, res, io) => {
     let returnData = [];
     const file = req.files;
     let count = 0; /** counts all files that are uploaded */
@@ -101,6 +101,13 @@ const s3upload = (req, res) => {
         };
         s3.upload(params, function (err, data) {
             afterAllUpload(err, data, item, newName);
+        }).on("httpUploadProgress", (progress) => {
+            let percent = (progress.loaded / progress.total) * 100;
+            let data = {
+                file: item.originalname,
+                percent: percent
+            }
+            io.emit('upload progress', data);
         });
     });
 }

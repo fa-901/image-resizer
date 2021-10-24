@@ -7,6 +7,14 @@ const uploadController = require('./imageUpload');
 
 const PORT = process.env.PORT || 9000;
 
+const httpServer = require("http").createServer();
+const io = require("socket.io")(httpServer, {
+	cors: {
+		origin: '*',
+	}
+});
+httpServer.listen(9001);
+
 const app = express();
 
 app.use(cors())
@@ -21,8 +29,4 @@ app.listen(PORT, () => {
 	console.log(`Server listening on ${PORT}`);
 });
 
-app.get('*', (req, res) => {
-	res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
-});
-
-app.post('/api/upload', uploadController.multipleUpload, uploadController.s3upload);
+app.post('/api/upload', uploadController.multipleUpload, (req, res) => { uploadController.s3upload(req, res, io)});
