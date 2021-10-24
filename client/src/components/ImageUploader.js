@@ -101,7 +101,7 @@ const ImageUploader = ({ onUpload }) => {
                 multiple
                 disabled={uploadDisabled}
             />
-            <Previewer list={files} />
+            <Previewer list={files} loading={uploading} />
             <ImageResizer resVal={selectedRes} resUpdate={(e) => { setRes(e) }} />
             <button className={`${selectedRes ? '' : 'hidden'} btn`} onClick={uploadToBucket} disabled={uploading} >
                 Upload Files

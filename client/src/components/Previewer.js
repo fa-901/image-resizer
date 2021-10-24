@@ -1,4 +1,5 @@
 import styles from '../styles/preview.module.scss';
+import LoaderBar from './LoaderBar';
 
 const Previewer = ({ list }) => {
     let imgList = list.map((item) => {
@@ -8,6 +9,7 @@ const Previewer = ({ list }) => {
                 <div className={styles.label}>
                     {item.name}
                 </div>
+                <LoaderBar percent={item.percent} />
             </div>
         )
     })
