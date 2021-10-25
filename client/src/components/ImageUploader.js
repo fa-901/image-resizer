@@ -5,11 +5,12 @@ import Previewer from "./Previewer";
 import styles from '../styles/upload.module.scss';
 import spinner from '../images/spinner.gif';
 import io from 'socket.io-client';
+import { UPLOAD_FILE_STATUS, UPLOAD_STATUS } from '../constants/localStorageKeys';
 
 const ImageUploader = ({ onUpload }) => {
     const [sock, setSock] = useState('');
-    const [files, setFile] = useState([]);
-    const [uploading, toggleUpload] = useState(false);
+    const [files, setFile] = useState(localStorage.getItem(UPLOAD_FILE_STATUS) ? JSON.parse(localStorage.getItem(UPLOAD_FILE_STATUS)) : []);
+    const [uploading, toggleUpload] = useState(localStorage.getItem(UPLOAD_STATUS) ? (JSON.parse(localStorage.getItem(UPLOAD_STATUS)) === 'true') : false);
     const [selectedRes, setRes] = useState('');
     const fileInput = useRef(null);
 
@@ -21,6 +22,27 @@ const ImageUploader = ({ onUpload }) => {
         setProgress(sock);
     }, [sock]);
 
+    useEffect(() => {
+        if (uploading) {
+            localStorage.setItem(UPLOAD_FILE_STATUS, JSON.stringify(files));
+        }
+        localStorage.setItem(UPLOAD_STATUS, uploading);
+        let allUploaded = files.every(item => item.percent === 100);
+        if (allUploaded) {
+            toggleUpload(false);
+            let list = files.map((item) => {
+                let host = new URL(item.uploadedURL).hostname;
+                let path = new URL(item.uploadedURL).pathname.substring(1);
+                let resizedUrl = `https://${host}/resized-${path}`;
+                return {
+                    url: resizedUrl,
+                    originalName: item.name,
+                }
+            })
+            onUpload(list);
+        }
+    }, [files, uploading]);
+
     const openUploadSocket = () => {
         var socket = io.connect('http://localhost:9001');
         socket.on('upload progress', (data) => {
@@ -29,12 +51,15 @@ const ImageUploader = ({ onUpload }) => {
     }
 
     const setProgress = (data) => {
-        if (!data) {
+        let index = files.findIndex((item) => { return item.name === data?.file })
+        if (!data || index < 0) {
             return
         }
-        let index = files.findIndex((item) => { return item.name === data.file })
         let newData = [...files];
         newData[index].percent = data.percent;
+        if (data?.url) {
+            newData[index].uploadedURL = data.url;
+        }
         setFile(newData);
     }
 
@@ -71,15 +96,6 @@ const ImageUploader = ({ onUpload }) => {
             .then((res) => res.json())
             .then((data) => {
                 toggleUpload(false);
-                let list = data.fileStatus.map((item) => {
-                    let host = new URL(item.url).hostname;
-                    let resizedUrl = `https://${host}/resized-${item.file}`;
-                    return {
-                        url: resizedUrl,
-                        originalName: item.original,
-                    }
-                })
-                onUpload(list);
                 setRes('');
             })
     }
