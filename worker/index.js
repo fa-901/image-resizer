@@ -43,6 +43,14 @@ var paramsFail = {
     WaitTimeSeconds: 0
 };
 
+const httpServer = require("http").createServer();
+const io = require("socket.io")(httpServer, {
+    cors: {
+        origin: '*',
+    }
+});
+httpServer.listen(9002);
+
 const deleteMessage = (deleteParams) => {
     sqs.deleteMessage(deleteParams, function (err, data) {
         // if (!err) {
@@ -63,6 +71,13 @@ const uploadToS3 = (fileName, fileBuffer) => {
         if (!err) {
             console.log(data.key);
         }
+        let obj = {
+            fileName: fileName,
+            resize: 'success',
+            upload: 'success',
+            resizedURL: data.Location,
+        }
+        io.emit('worker data', obj);
     });
 }
 
@@ -80,7 +95,7 @@ const sendSQSFail = (fileName, imageURL) => {
             },
         },
         MessageBody: 'Resize Failed',
-        QueueUrl: process.env.SQS_FAIL_URL
+        QueueUrl: queueURLFail
     };
     sqs.sendMessage(params, function (err, data) {
         if (err) {
@@ -106,6 +121,8 @@ const resizeFn = (fileName, imageURL, resizeBy) => {
                     sendSQSFail(fileName, imageURL);
                 }
             })
+    }).on('error', function (err) {
+        sendSQSFail(fileName, imageURL);
     });
 }
 
@@ -136,7 +153,12 @@ const receiveMessageFail = () => sqs.receiveMessage(paramsFail, function (err, d
                 ReceiptHandle: item.ReceiptHandle
             };
             deleteMessage(deleteParams);
-            console.log(item.MessageAttributes);
+            let obj = {
+                fileName: item.MessageAttributes?.FileName?.StringValue || '',
+                resize: 'failed',
+                upload: 'failed',
+            }
+            io.emit('worker data', obj);
         })
     }
 });
