@@ -1,53 +1,57 @@
 import { useEffect, useState } from 'react';
+import io from 'socket.io-client';
+import { saveAs } from 'file-saver';
+import dayjs from 'dayjs';
 import spinner from '../images/spinner.gif';
+import Timer from './Timer';
 
 const ImageDownloader = ({ urlData, onClearData }) => {
+    const [sock, setSock] = useState('');
     const [allLoaded, setLoaded] = useState(false);
     const [imgURL, setImg] = useState(urlData);
 
     useEffect(() => {
-        let allReady = imgURL.every((item) => {
-            return item?.uploaded === true;
-        });
-        if (!allReady) {
-            setInterval(checkProgress, 5000);
+        var socket = io.connect('http://localhost:9002');
+        socket.on('worker data', (data) => {
+            setSock(data);
+        })
+
+        return () => {
+            socket.disconnect();
         }
-        else {
-            clearInterval(checkProgress);
+    }, []);
+
+    useEffect(() => {
+        setProgress(sock);
+    }, [sock]);
+
+    useEffect(() => {
+        let allUploaded = imgURL.every((item) => item?.upload || item?.resize);
+        if (allUploaded) {
             setLoaded(true);
-            setTimeout(() => { onClearData([]) }, 300000);
         }
     }, [imgURL]);
 
-    function imageExists(url, callback) {
-        const img = new Image();
-        img.src = url;
-        if (img.complete) {
-            callback(true);
-        } else {
-            img.onload = () => {
-                callback(true);
-            };
-            img.onerror = () => {
-                callback(false);
-            };
+    const setProgress = (data) => {
+        let index = imgURL.findIndex((item) => { return item.fileName === data?.fileName });
+        if (!data || index < 0) {
+            return
         }
+        let newData = [...imgURL];
+        newData[index].resize = data.resize;
+        newData[index].upload = data.upload;
+        if (data.resizedURL) {
+            newData[index].resizedURL = data.resizedURL;
+        }
+        setImg(newData);
     }
 
-    const checkProgress = () => {
-        urlData.map((item, index) => {
-            imageExists(item.url, (cb) => {
-                if (cb) {
-                    let t = [...imgURL];
-                    t[index].uploaded = true
-                    setImg(t);
-                }
-            })
-        })
+    const downloadImg = (url, name) => {
+        saveAs(url, name)
     }
 
     let readyCount = imgURL.reduce((acc, val) => {
-        if (val.uploaded) {
+        if (val.upload || val.resize) {
             return acc + 1
         }
         else return acc;
@@ -55,16 +59,18 @@ const ImageDownloader = ({ urlData, onClearData }) => {
     let isReady = readyCount === imgURL.length;
 
     let downloadList = imgURL
-        .filter((item) => item?.uploaded === true)
+        .filter((item) => item?.upload || item?.resize)
         .map((img) => {
             return (
-                <div key={img.url} className={`flex items-center border p-3 rounded`} >
+                <div key={img.fileName} className={`flex items-center border p-3 rounded`} >
                     <label className='mr-auto'>
                         {img.originalName}
                     </label>
-                    <a className="btn" href={img.url} download>
-                        Download
-                    </a>
+                    {img.upload === 'success' ? (
+                        <button className="btn" onClick={() => { downloadImg(img.resizedURL, img.originalName) }}>
+                            Download
+                        </button>
+                    ) : <span className='text-red-500'>Failed To Resize.</span>}
                 </div>
             )
         });
@@ -75,7 +81,7 @@ const ImageDownloader = ({ urlData, onClearData }) => {
                 <h1 className="text-xl">Resized Images {!isReady && <img src={spinner} className='spinner' />}</h1>
                 <h2>{readyCount}/{imgURL.length} Files Ready</h2>
                 {allLoaded && <h3 className="text-red-500">
-                    Your images are ready. You have 5 minutes to download.
+                    Your images are ready. Time remaining: <Timer onEnd={() => { onClearData([]) }} expiry={dayjs().add(5, 'minute')} />
                 </h3>}
             </div>
             <div className='grid grid-cols-1 gap-4'>

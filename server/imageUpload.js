@@ -100,6 +100,13 @@ const s3upload = (req, res, io) => {
             Tagging: 'public=yes',
         };
         s3.upload(params, function (err, data) {
+            let obj = {
+                file: item.originalname,
+                percent: 100,
+                url: data.Location,
+                uuidName: newName,
+            }
+            io.emit('upload progress', obj);
             afterAllUpload(err, data, item, newName);
         }).on("httpUploadProgress", (progress) => {
             let percent = (progress.loaded / progress.total) * 100;
@@ -107,7 +114,9 @@ const s3upload = (req, res, io) => {
                 file: item.originalname,
                 percent: percent
             }
-            io.emit('upload progress', data);
+            if (percent < 100) {
+                io.emit('upload progress', data);
+            }
         });
     });
 }
