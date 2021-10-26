@@ -7,7 +7,7 @@ const LoaderBar = ({ percent }) => {
                 <div className={`transition-all ${styles.progress}`} style={{ width: `${percent}%` }}>
                 </div>
             </div>
-            {(percent !== 0) && `${percent}%`}
+            {(percent !== 0) && `${Math.round(percent * 10) / 10}%`}
         </>
     )
 }

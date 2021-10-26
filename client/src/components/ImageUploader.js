@@ -9,8 +9,10 @@ import { UPLOAD_FILE_STATUS, UPLOAD_STATUS } from '../constants/localStorageKeys
 
 const ImageUploader = ({ onUpload }) => {
     const [sock, setSock] = useState('');
-    const [files, setFile] = useState(localStorage.getItem(UPLOAD_FILE_STATUS) ? JSON.parse(localStorage.getItem(UPLOAD_FILE_STATUS)) : []);
-    const [uploading, toggleUpload] = useState(localStorage.getItem(UPLOAD_STATUS) ? (JSON.parse(localStorage.getItem(UPLOAD_STATUS)) === 'true') : false);
+    // const [files, setFile] = useState(localStorage.getItem(UPLOAD_FILE_STATUS) ? JSON.parse(localStorage.getItem(UPLOAD_FILE_STATUS)) : []);
+    // const [uploading, toggleUpload] = useState(localStorage.getItem(UPLOAD_STATUS) ? (JSON.parse(localStorage.getItem(UPLOAD_STATUS)) === 'true') : false);
+    const [files, setFile] = useState([]);
+    const [uploading, toggleUpload] = useState(false);
     const [selectedRes, setRes] = useState('');
     const fileInput = useRef(null);
 
@@ -23,10 +25,10 @@ const ImageUploader = ({ onUpload }) => {
     }, [sock]);
 
     useEffect(() => {
-        if (uploading) {
-            localStorage.setItem(UPLOAD_FILE_STATUS, JSON.stringify(files));
-        }
-        localStorage.setItem(UPLOAD_STATUS, uploading);
+        // if (uploading) {
+        //     localStorage.setItem(UPLOAD_FILE_STATUS, JSON.stringify(files));
+        // }
+        // localStorage.setItem(UPLOAD_STATUS, uploading);
         let allUploaded = files.every(item => item.percent === 100);
         if (allUploaded) {
             toggleUpload(false);

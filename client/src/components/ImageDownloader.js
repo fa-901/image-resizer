@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { saveAs } from 'file-saver';
+import dayjs from 'dayjs';
 import spinner from '../images/spinner.gif';
+import Timer from './Timer';
 
 const ImageDownloader = ({ urlData, onClearData }) => {
     const [sock, setSock] = useState('');
@@ -9,12 +11,26 @@ const ImageDownloader = ({ urlData, onClearData }) => {
     const [imgURL, setImg] = useState(urlData);
 
     useEffect(() => {
-        openWorkerSocket();
+        var socket = io.connect('http://localhost:9002');
+        socket.on('worker data', (data) => {
+            setSock(data);
+        })
+
+        return () => {
+            socket.disconnect();
+        }
     }, []);
 
     useEffect(() => {
         setProgress(sock);
     }, [sock]);
+
+    useEffect(() => {
+        let allUploaded = imgURL.every((item) => item?.upload || item?.resize);
+        if (allUploaded) {
+            setLoaded(true);
+        }
+    }, [imgURL]);
 
     const setProgress = (data) => {
         let index = imgURL.findIndex((item) => { return item.fileName === data?.fileName });
@@ -28,13 +44,6 @@ const ImageDownloader = ({ urlData, onClearData }) => {
             newData[index].resizedURL = data.resizedURL;
         }
         setImg(newData);
-    }
-
-    const openWorkerSocket = () => {
-        var socket = io.connect('http://localhost:9002');
-        socket.on('worker data', (data) => {
-            setSock(data);
-        })
     }
 
     const downloadImg = (url, name) => {
@@ -58,7 +67,7 @@ const ImageDownloader = ({ urlData, onClearData }) => {
                         {img.originalName}
                     </label>
                     {img.upload === 'success' ? (
-                        <button className="btn" onClick={() => { downloadImg(img.resizedURL, img.fileName) }}>
+                        <button className="btn" onClick={() => { downloadImg(img.resizedURL, img.originalName) }}>
                             Download
                         </button>
                     ) : <span className='text-red-500'>Failed To Resize.</span>}
@@ -72,7 +81,7 @@ const ImageDownloader = ({ urlData, onClearData }) => {
                 <h1 className="text-xl">Resized Images {!isReady && <img src={spinner} className='spinner' />}</h1>
                 <h2>{readyCount}/{imgURL.length} Files Ready</h2>
                 {allLoaded && <h3 className="text-red-500">
-                    Your images are ready. You have 5 minutes to download.
+                    Your images are ready. Time remaining: <Timer onEnd={() => { onClearData([]) }} expiry={dayjs().add(5, 'minute')} />
                 </h3>}
             </div>
             <div className='grid grid-cols-1 gap-4'>
