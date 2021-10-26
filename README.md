@@ -30,6 +30,9 @@ SQS_FAIL_URL=XXXXXX
 ## Front-end libs
 - React
 - Tailwind
+- Socket.IO client
+- DayJS
+- file-saver
 
 ## Back-end libs
 - Express
@@ -38,3 +41,4 @@ SQS_FAIL_URL=XXXXXX
 - Sharp
 - UUID
 - Multer
+- Socket.IO server

@@ -13,7 +13,6 @@ const Timer = ({ onEnd, expiry }) => {
 
     function startTimer() {
         let remainingS = expiry.diff(dayjs(), 'second');
-        console.log(remainingS);
         if (remainingS === 0) {
             onEnd();
         }
