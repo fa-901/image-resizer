@@ -104,6 +104,7 @@ const s3upload = (req, res, io) => {
                 file: item.originalname,
                 percent: 100,
                 url: data.Location,
+                uuidName: newName,
             }
             io.emit('upload progress', obj);
             afterAllUpload(err, data, item, newName);

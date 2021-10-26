@@ -31,12 +31,9 @@ const ImageUploader = ({ onUpload }) => {
         if (allUploaded) {
             toggleUpload(false);
             let list = files.map((item) => {
-                let host = new URL(item.uploadedURL).hostname;
-                let path = new URL(item.uploadedURL).pathname.substring(1);
-                let resizedUrl = `https://${host}/resized-${path}`;
                 return {
-                    url: resizedUrl,
                     originalName: item.name,
+                    fileName: item.uuidName,
                 }
             })
             onUpload(list);
@@ -57,8 +54,8 @@ const ImageUploader = ({ onUpload }) => {
         }
         let newData = [...files];
         newData[index].percent = data.percent;
-        if (data?.url) {
-            newData[index].uploadedURL = data.url;
+        if (data?.uuidName) {
+            newData[index].uuidName = data.uuidName;
         }
         setFile(newData);
     }

@@ -1,53 +1,48 @@
 import { useEffect, useState } from 'react';
+import io from 'socket.io-client';
+import { saveAs } from 'file-saver';
 import spinner from '../images/spinner.gif';
 
 const ImageDownloader = ({ urlData, onClearData }) => {
+    const [sock, setSock] = useState('');
     const [allLoaded, setLoaded] = useState(false);
     const [imgURL, setImg] = useState(urlData);
 
     useEffect(() => {
-        let allReady = imgURL.every((item) => {
-            return item?.uploaded === true;
-        });
-        if (!allReady) {
-            setInterval(checkProgress, 5000);
-        }
-        else {
-            clearInterval(checkProgress);
-            setLoaded(true);
-            setTimeout(() => { onClearData([]) }, 300000);
-        }
-    }, [imgURL]);
+        openWorkerSocket();
+    }, []);
 
-    function imageExists(url, callback) {
-        const img = new Image();
-        img.src = url;
-        if (img.complete) {
-            callback(true);
-        } else {
-            img.onload = () => {
-                callback(true);
-            };
-            img.onerror = () => {
-                callback(false);
-            };
+    useEffect(() => {
+        setProgress(sock);
+    }, [sock]);
+
+    const setProgress = (data) => {
+        let index = imgURL.findIndex((item) => { return item.fileName === data?.fileName });
+        if (!data || index < 0) {
+            return
         }
+        let newData = [...imgURL];
+        newData[index].resize = data.resize;
+        newData[index].upload = data.upload;
+        if (data.resizedURL) {
+            newData[index].resizedURL = data.resizedURL;
+        }
+        setImg(newData);
     }
 
-    const checkProgress = () => {
-        urlData.map((item, index) => {
-            imageExists(item.url, (cb) => {
-                if (cb) {
-                    let t = [...imgURL];
-                    t[index].uploaded = true
-                    setImg(t);
-                }
-            })
+    const openWorkerSocket = () => {
+        var socket = io.connect('http://localhost:9002');
+        socket.on('worker data', (data) => {
+            setSock(data);
         })
     }
 
+    const downloadImg = (url, name) => {
+        saveAs(url, name)
+    }
+
     let readyCount = imgURL.reduce((acc, val) => {
-        if (val.uploaded) {
+        if (val.upload || val.resize) {
             return acc + 1
         }
         else return acc;
@@ -55,16 +50,18 @@ const ImageDownloader = ({ urlData, onClearData }) => {
     let isReady = readyCount === imgURL.length;
 
     let downloadList = imgURL
-        .filter((item) => item?.uploaded === true)
+        .filter((item) => item?.upload || item?.resize)
         .map((img) => {
             return (
-                <div key={img.url} className={`flex items-center border p-3 rounded`} >
+                <div key={img.fileName} className={`flex items-center border p-3 rounded`} >
                     <label className='mr-auto'>
                         {img.originalName}
                     </label>
-                    <a className="btn" href={img.url} download>
-                        Download
-                    </a>
+                    {img.upload === 'success' ? (
+                        <button className="btn" onClick={() => { downloadImg(img.resizedURL, img.fileName) }}>
+                            Download
+                        </button>
+                    ) : <span className='text-red-500'>Failed To Resize.</span>}
                 </div>
             )
         });
