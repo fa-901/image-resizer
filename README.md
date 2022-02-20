@@ -1,4 +1,4 @@
-# insidemaps-takehome
+# image-resizer
 A fullstack React + Node app that resizes image files.
 
 ---

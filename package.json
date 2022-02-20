@@ -1,5 +1,5 @@
 {
-  "name": "insidemaps-takehome",
+  "name": "image-resizer",
   "version": "0.1.0",
   "description": "Image Resizer Project",
   "main": "index.js",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fa-901/insidemaps-takehome.git"
+    "url": "git+https://github.com/fa-901/image-resizer.git"
   },
   "author": "Farhan Alam",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/fa-901/insidemaps-takehome/issues"
+    "url": "https://github.com/fa-901/image-resizer/issues"
   },
-  "homepage": "https://github.com/fa-901/insidemaps-takehome#readme",
+  "homepage": "https://github.com/fa-901/image-resizer#readme",
   "dependencies": {
     "aws-sdk": "^2.1009.0",
     "cors": "^2.8.5",
